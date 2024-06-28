@@ -1,6 +1,8 @@
-package com.chernov.api;
+package com.chernov.internal.impl;
 
-import com.chernov.core.Attachment;
+import com.chernov.FileStorageApi;
+import com.chernov.Attachment;
+import com.chernov.internal.api.InternalFileStorageApi;
 
 import java.util.Collection;
 

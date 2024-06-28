@@ -1,4 +1,4 @@
-package com.chernov.core;
+package com.chernov;
 
 import java.io.InputStream;
 import java.util.Map;

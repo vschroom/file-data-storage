@@ -1,8 +1,9 @@
 package com.chernov.api;
 
-import com.chernov.core.Attachment;
-import com.chernov.core.FileAttachment;
+import com.chernov.Attachment;
 import com.chernov.core.FileSystemService;
+import com.chernov.internal.api.InternalFileStorageApi;
+import com.chernov.internal.impl.FileAttachment;
 
 import java.nio.file.Path;
 import java.util.Collection;
@@ -39,6 +40,10 @@ public record DirectoryFileStorage(FileSystemService fileSystemService) implemen
     }
 
     private Path toPath(String path) {
-        return Path.of(path);
+        return createDirectoriesByProperty().resolve(Path.of(path));
+    }
+
+    private Path createDirectoriesByProperty() {
+        return fileSystemService.createDirectoriesByProperty();
     }
 }

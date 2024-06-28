@@ -1,4 +1,4 @@
-package com.chernov.core;
+package com.chernov;
 
 public enum AttachmentTypeId {
 

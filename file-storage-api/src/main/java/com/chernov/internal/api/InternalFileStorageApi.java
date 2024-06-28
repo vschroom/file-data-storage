@@ -1,6 +1,6 @@
-package com.chernov.api;
+package com.chernov.internal.api;
 
-import com.chernov.core.Attachment;
+import com.chernov.Attachment;
 
 import java.util.Collection;
 

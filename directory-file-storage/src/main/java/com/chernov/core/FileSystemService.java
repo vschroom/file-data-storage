@@ -17,4 +17,6 @@ public interface FileSystemService {
     boolean existsFile(Path path);
 
     boolean removeFile(Path path);
+
+    Path createDirectoriesByProperty();
 }

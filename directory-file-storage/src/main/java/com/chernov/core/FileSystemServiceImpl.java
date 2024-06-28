@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-public class FileSystemServiceImpl implements FileSystemService {
+public record FileSystemServiceImpl(DirectoryFileStorageProperties properties) implements FileSystemService {
 
     public Path uploadFile(Path path, InputStream content) {
         validateExistence(path);
@@ -74,6 +74,15 @@ public class FileSystemServiceImpl implements FileSystemService {
         var existsFile = existsFile(path);
         if (existsFile) {
             throw new FileAlreadyExistsException(path.toString());
+        }
+    }
+
+    public Path createDirectoriesByProperty() {
+        var directories = properties.getDirectories();
+        try {
+            return Files.createDirectories(directories);
+        } catch (IOException e) {
+            throw new FileCreateDirectoryException(directories.toString(), e);
         }
     }
 }

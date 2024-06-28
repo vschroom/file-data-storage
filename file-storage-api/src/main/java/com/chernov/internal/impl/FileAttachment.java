@@ -1,4 +1,7 @@
-package com.chernov.core;
+package com.chernov.internal.impl;
+
+import com.chernov.Attachment;
+import com.chernov.AttachmentTypeId;
 
 import java.io.InputStream;
 import java.util.Map;
