@@ -12,8 +12,8 @@
     </parent>
 
     <artifactId>directory-file-storage</artifactId>
-    <packaging>jar</packaging>
     <version>0.0.1-SNAPSHOT</version>
+    <packaging>jar</packaging>
     <name>Directory implementation of file storage contracts</name>
 
     <build>
