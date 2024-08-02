@@ -13,6 +13,7 @@
     <modules>
         <module>file-storage-api</module>
         <module>directory-file-storage</module>
+        <module>minio-file-storage</module>
     </modules>
 
     <build>

@@ -1,3 +1,4 @@
 .idea
 directory-file-storage/target
 file-storage-api/target
+minio-file-storage/target
