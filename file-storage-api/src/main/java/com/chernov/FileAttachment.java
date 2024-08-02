@@ -1,13 +1,21 @@
-package com.chernov.internal.impl;
+package com.chernov;
 
 import com.chernov.Attachment;
 import com.chernov.AttachmentTypeId;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
 
 import java.io.InputStream;
 import java.util.Map;
 
-public record FileAttachment(String id, InputStream content, Map<String, String> metadata, AttachmentTypeId typeId)
-        implements Attachment {
+@RequiredArgsConstructor
+public class FileAttachment implements Attachment {
+
+    private final String id;
+    private final InputStream content;
+    private final Map<String, String> metadata;
+    private final AttachmentTypeId typeId;
 
     @Override
     public String getId() {

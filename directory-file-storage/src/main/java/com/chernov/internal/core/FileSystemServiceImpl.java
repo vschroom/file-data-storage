@@ -1,6 +1,8 @@
-package com.chernov.core;
+package com.chernov.internal.core;
 
-import com.chernov.exceptions.*;
+import com.chernov.DirectoryFileStorageProperties;
+import com.chernov.internal.exceptions.*;
+import lombok.RequiredArgsConstructor;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,9 +11,13 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-public record FileSystemServiceImpl(DirectoryFileStorageProperties properties) implements FileSystemService {
+@RequiredArgsConstructor
+public class FileSystemServiceImpl implements FileSystemService {
+
+    private final DirectoryFileStorageProperties properties;
 
     public Path uploadFile(Path path, InputStream content) {
         validateExistence(path);
@@ -38,7 +44,7 @@ public record FileSystemServiceImpl(DirectoryFileStorageProperties properties) i
     }
 
     public Map<String, String> readMetadata(Path path, String metadataKeys) {
-        var attributes = "user:%s".formatted(metadataKeys);
+        var attributes = format("user:%s", metadataKeys);
         try {
             return Files.readAttributes(path, attributes).entrySet().stream()
                     .collect(Collectors.toMap(Map.Entry::getKey, e -> new String((byte[]) e.getValue())));
@@ -62,7 +68,7 @@ public record FileSystemServiceImpl(DirectoryFileStorageProperties properties) i
     }
 
     private void addMetadata(Path path, String key, String value) {
-        var userKey = "user:%s".formatted(key);
+        var userKey = format("user:%s", key);
         try {
             Files.setAttribute(path, userKey, value.getBytes(UTF_8));
         } catch (IOException e) {

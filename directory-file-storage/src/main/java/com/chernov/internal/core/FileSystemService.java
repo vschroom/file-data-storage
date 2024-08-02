@@ -1,10 +1,10 @@
-package com.chernov.core;
+package com.chernov.internal.core;
 
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.Map;
 
-public interface FileSystemService {
+interface FileSystemService {
 
     Path uploadFile(Path path, InputStream content);
 

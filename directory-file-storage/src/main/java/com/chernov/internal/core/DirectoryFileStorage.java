@@ -1,14 +1,17 @@
-package com.chernov.api;
+package com.chernov.internal.core;
 
 import com.chernov.Attachment;
-import com.chernov.core.FileSystemService;
 import com.chernov.internal.api.InternalFileStorageApi;
-import com.chernov.internal.impl.FileAttachment;
+import com.chernov.FileAttachment;
+import lombok.RequiredArgsConstructor;
 
 import java.nio.file.Path;
 import java.util.Collection;
 
-public record DirectoryFileStorage(FileSystemService fileSystemService) implements InternalFileStorageApi {
+@RequiredArgsConstructor
+public class DirectoryFileStorage implements InternalFileStorageApi {
+
+    private final FileSystemService fileSystemService;
 
     @Override
     public void store(Attachment attachment) {

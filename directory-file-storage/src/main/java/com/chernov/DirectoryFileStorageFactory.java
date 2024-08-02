@@ -1,7 +1,7 @@
-package com.chernov.core;
+package com.chernov;
 
-import com.chernov.Contract;
-import com.chernov.api.DirectoryFileStorage;
+import com.chernov.internal.core.DirectoryFileStorage;
+import com.chernov.internal.core.FileSystemServiceImpl;
 
 public class DirectoryFileStorageFactory {
 
