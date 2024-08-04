@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum FileExtension {
-
     TXT(".txt"),
     DOC(".doc"),
     DOCX(".docx"),

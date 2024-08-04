@@ -37,6 +37,7 @@ public class DirectoryFileStorage implements InternalFileStorageApi {
         return new FileAttachment(id, fileContent, metadata);
     }
 
+    // FIXME для чего этот метод?
     private String joinUserMetadataKeys(Collection<String> metadataKeys) {
         return String.join(",", metadataKeys);
     }
@@ -45,6 +46,7 @@ public class DirectoryFileStorage implements InternalFileStorageApi {
         return createDirectoriesByProperty().resolve(Path.of(path));
     }
 
+    // FIXME так же как с минию, зачем нам на каждом бедном запросе проверять созданы ли рабочая диретория? Видимо есть какой то концептуальный пробел
     private Path createDirectoriesByProperty() {
         return fileSystemService.createDirectoriesByProperty();
     }

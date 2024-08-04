@@ -20,6 +20,7 @@ public class FileSystemServiceImpl implements FileSystemService {
     private final DirectoryFileStorageProperties properties;
 
     public Path uploadFile(Path path, InputStream content) {
+        // FIXME валидация для этого класса излишняя, он должен тупо работать с системным файловым хранилищем
         validateExistence(path);
 
         try (var in = content) {
@@ -45,7 +46,9 @@ public class FileSystemServiceImpl implements FileSystemService {
 
     public Map<String, String> readMetadata(Path path) {
         try {
+            // FIXME хардкод
             return Files.readAttributes(path, "user:*").entrySet().stream()
+                    // FIXME кодировку байт тоже нужно указать
                     .collect(Collectors.toMap(Map.Entry::getKey, e -> new String((byte[]) e.getValue())));
         } catch (IOException e) {
             throw new FileMetadataReadException(path.toString(), e);
@@ -67,6 +70,7 @@ public class FileSystemServiceImpl implements FileSystemService {
     }
 
     private void addMetadata(Path path, String key, String value) {
+        // FIXME хардкод
         var userKey = format("user:%s", key);
         try {
             Files.setAttribute(path, userKey, value.getBytes(UTF_8));

@@ -48,7 +48,7 @@ public class MinioFileStorageServiceImpl implements MinioFileStorageService {
             return objectResponse != null;
         } catch (Exception ex) {
             log.error("Some problem while put object={} with bucket={}", id, bucket, ex);
-
+            // FIXME получается что мы словили ошибку но как ни в чем не бывало продолжаем? или я неверно понял?
             return false;
         }
     }
@@ -75,7 +75,7 @@ public class MinioFileStorageServiceImpl implements MinioFileStorageService {
                             .object(id)
                             .bucket(bucket)
                             .build()
-            ).readAllBytes();
+            ).readAllBytes(); // FIXME а зачем ты это делаешь?
 
             return new ByteArrayInputStream(content);
         } catch (Exception ex) {
