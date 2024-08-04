@@ -2,8 +2,6 @@ package com.chernov.internal.api;
 
 import com.chernov.Attachment;
 
-import java.util.Collection;
-
 public interface InternalFileStorageApi {
 
     void store(Attachment attachment);
@@ -12,5 +10,5 @@ public interface InternalFileStorageApi {
 
     boolean remove(String id);
 
-    Attachment findBy(String id, Collection<String> metadataKeys);
+    Attachment findBy(String id);
 }

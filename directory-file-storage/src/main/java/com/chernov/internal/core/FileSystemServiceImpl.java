@@ -43,10 +43,9 @@ public class FileSystemServiceImpl implements FileSystemService {
         }
     }
 
-    public Map<String, String> readMetadata(Path path, String metadataKeys) {
-        var attributes = format("user:%s", metadataKeys);
+    public Map<String, String> readMetadata(Path path) {
         try {
-            return Files.readAttributes(path, attributes).entrySet().stream()
+            return Files.readAttributes(path, "user:*").entrySet().stream()
                     .collect(Collectors.toMap(Map.Entry::getKey, e -> new String((byte[]) e.getValue())));
         } catch (IOException e) {
             throw new FileMetadataReadException(path.toString(), e);

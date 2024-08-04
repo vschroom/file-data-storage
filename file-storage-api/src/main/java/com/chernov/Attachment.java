@@ -10,6 +10,4 @@ public interface Attachment {
     InputStream getContent();
 
     Map<String, String> getMetadata();
-
-    AttachmentTypeId getTypeId();
 }

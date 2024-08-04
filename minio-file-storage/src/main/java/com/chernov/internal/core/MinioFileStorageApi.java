@@ -3,10 +3,8 @@ package com.chernov.internal.core;
 import com.chernov.Attachment;
 import com.chernov.FileAttachment;
 import com.chernov.internal.api.InternalFileStorageApi;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-
-import java.util.Collection;
-import java.util.Map;
 
 @RequiredArgsConstructor
 public class MinioFileStorageApi implements InternalFileStorageApi {
@@ -14,28 +12,27 @@ public class MinioFileStorageApi implements InternalFileStorageApi {
     private final MinioFileStorageService minioFileStorageService;
 
     @Override
-    public void store(Attachment attachment) {
-        var bucket = attachment.getId();
-        minioFileStorageService.makeBucketIfNotExists(bucket);
-        minioFileStorageService.putObject(attachment, bucket);
+    public void store(@NonNull Attachment attachment) {
+        minioFileStorageService.putObject(attachment);
     }
 
     @Override
-    public boolean exists(String id) {
-        return minioFileStorageService.bucketExists(id);
+    public boolean exists(@NonNull String id) {
+        return minioFileStorageService.hasObject(id);
     }
 
     @Override
-    public boolean remove(String id) {
+    public boolean remove(@NonNull String id) {
         minioFileStorageService.removeObject(id);
 
         return true;
     }
 
     @Override
-    public Attachment findBy(String id, Collection<String> metadataKeys) {
+    public Attachment findBy(@NonNull String id) {
         var content = minioFileStorageService.getContent(id);
+        var userMetadata = minioFileStorageService.getUserMetadata(id);
 
-        return new FileAttachment(id, content, Map.of(), null);
+        return new FileAttachment(id, content, userMetadata);
     }
 }

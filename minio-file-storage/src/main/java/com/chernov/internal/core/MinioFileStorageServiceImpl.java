@@ -5,24 +5,29 @@ import com.chernov.internal.exceptions.MinioFileStorageException;
 import io.minio.*;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.Map;
 
 import static java.lang.String.format;
 
+@Slf4j
 @RequiredArgsConstructor
 public class MinioFileStorageServiceImpl implements MinioFileStorageService {
 
     private final MinioClient minioClient;
+    private final String bucket;
 
     @Override
-    public void putObject(@NonNull Attachment attachment, @NonNull String bucket) {
+    public void putObject(@NonNull Attachment attachment) {
+        makeBucketIfNotExists(bucket);
         try (var bw = attachment.getContent()) {
             minioClient.putObject(
                     PutObjectArgs.builder()
                             .object(attachment.getId())
-                            .stream(bw, -1, 5 * (long) Math.pow(1024, 2))
+                            .stream(bw, bw.available(), -1)
                             .bucket(bucket)
                             .userMetadata(attachment.getMetadata())
                             .build());
@@ -33,20 +38,69 @@ public class MinioFileStorageServiceImpl implements MinioFileStorageService {
     }
 
     @Override
-    public boolean bucketExists(@NonNull String bucket) {
+    public boolean hasObject(@NonNull String id) {
         try {
-            return minioClient.bucketExists(BucketExistsArgs.builder()
+            var objectResponse = minioClient.statObject(StatObjectArgs.builder()
                     .bucket(bucket)
+                    .object(id)
                     .build());
+
+            return objectResponse != null;
         } catch (Exception ex) {
-            throw new MinioFileStorageException(
-                    format("Some problem while check bucket=%s existence", bucket), ex);
+            log.error("Some problem while put object={} with bucket={}", id, bucket, ex);
+
+            return false;
         }
     }
 
     @Override
-    public void makeBucketIfNotExists(@NonNull String bucket) {
-        var exists = this.bucketExists(bucket);
+    public void removeObject(@NonNull String id) {
+        try {
+            minioClient.removeObject(
+                    RemoveObjectArgs.builder()
+                            .bucket(bucket)
+                            .object(id)
+                            .build());
+        } catch (Exception ex) {
+            throw new MinioFileStorageException(
+                    format("Some problem while remove object=%s with bucket=%s", id, bucket), ex);
+        }
+    }
+
+    @Override
+    public InputStream getContent(@NonNull String id) {
+        try {
+            var content = minioClient.getObject(
+                    GetObjectArgs.builder()
+                            .object(id)
+                            .bucket(bucket)
+                            .build()
+            ).readAllBytes();
+
+            return new ByteArrayInputStream(content);
+        } catch (Exception ex) {
+            throw new MinioFileStorageException(
+                    format("Some problem while getting object=%s by bucket=%s", id, bucket), ex);
+        }
+    }
+
+    @Override
+    public Map<String, String> getUserMetadata(String id) {
+        try {
+            return minioClient.statObject(
+                            StatObjectArgs.builder()
+                                    .bucket(bucket)
+                                    .object(id)
+                                    .build())
+                    .userMetadata();
+        } catch (Exception ex) {
+            throw new MinioFileStorageException(
+                    format("Some problem while getting user metadata for object=%s with bucket=%s", id, bucket), ex);
+        }
+    }
+
+    private void makeBucketIfNotExists(@NonNull String bucket) {
+        var exists = this.hasObject(bucket);
         if (!exists) {
             try {
                 minioClient.makeBucket(MakeBucketArgs.builder()
@@ -56,41 +110,6 @@ public class MinioFileStorageServiceImpl implements MinioFileStorageService {
                 throw new MinioFileStorageException(
                         format("Some problem while make bucket=%s", bucket), ex);
             }
-        }
-    }
-
-    @Override
-    public void removeObject(@NonNull String bucket) {
-        try {
-            minioClient.removeObject(
-                    RemoveObjectArgs.builder()
-                            .bucket(bucket)
-                            .build());
-        } catch (Exception ex) {
-            throw new MinioFileStorageException(
-                    format("Some problem while remove bucket=%s", bucket), ex);
-        }
-    }
-
-    @Override
-    public InputStream getContent(@NonNull String bucket) {
-        try {
-            var getObjectArgs = GetObjectArgs.builder()
-                    .object(bucket)
-                    .bucket(bucket)
-                    .build();
-
-            var content = minioClient.getObject(
-                    GetObjectArgs.builder()
-                            .object(bucket)
-                            .bucket(bucket)
-                            .build()
-            ).readAllBytes();
-
-            return new ByteArrayInputStream(content);
-        } catch (Exception ex) {
-            throw new MinioFileStorageException(
-                    format("Some problem while getting object by bucket=%s", bucket), ex);
         }
     }
 }

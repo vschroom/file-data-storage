@@ -2,3 +2,6 @@
 directory-file-storage/target
 file-storage-api/target
 minio-file-storage/target
+example-storage-implementation/target
+minio-file-storage/config
+minio-file-storage/data

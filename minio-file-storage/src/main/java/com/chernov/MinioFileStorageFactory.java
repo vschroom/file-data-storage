@@ -7,7 +7,9 @@ import com.chernov.internal.core.MinioFileStorageServiceImpl;
 public class MinioFileStorageFactory {
 
     public static Contract create(MinioFileStorageProperties minioFileStorageProperties) {
+        var minioClientConfig = new MinioClientConfig(minioFileStorageProperties);
+
         return () -> new MinioFileStorageApi(new MinioFileStorageServiceImpl(
-                new MinioClientConfig(minioFileStorageProperties).minioClient()));
+                minioClientConfig.minioClient(), minioClientConfig.getBucket()));
     }
 }

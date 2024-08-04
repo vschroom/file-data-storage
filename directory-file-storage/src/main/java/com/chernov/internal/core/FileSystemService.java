@@ -12,7 +12,7 @@ interface FileSystemService {
 
     InputStream readFile(Path path);
 
-    Map<String, String> readMetadata(Path path, String metadataKeys);
+    Map<String, String> readMetadata(Path path);
 
     boolean existsFile(Path path);
 

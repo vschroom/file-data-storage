@@ -1,8 +1,8 @@
 package com.chernov.internal.core;
 
 import com.chernov.Attachment;
-import com.chernov.internal.api.InternalFileStorageApi;
 import com.chernov.FileAttachment;
+import com.chernov.internal.api.InternalFileStorageApi;
 import lombok.RequiredArgsConstructor;
 
 import java.nio.file.Path;
@@ -30,12 +30,11 @@ public class DirectoryFileStorage implements InternalFileStorageApi {
     }
 
     @Override
-    public Attachment findBy(String id, Collection<String> metadataKeys) {
-        var attributes = joinUserMetadataKeys(metadataKeys);
+    public Attachment findBy(String id) {
         var fileContent = fileSystemService.readFile(toPath(id));
-        var metadata = fileSystemService.readMetadata(toPath(id), attributes);
+        var metadata = fileSystemService.readMetadata(toPath(id));
 
-        return new FileAttachment(id, fileContent, metadata, null);
+        return new FileAttachment(id, fileContent, metadata);
     }
 
     private String joinUserMetadataKeys(Collection<String> metadataKeys) {

@@ -3,16 +3,17 @@ package com.chernov.internal.core;
 import com.chernov.Attachment;
 
 import java.io.InputStream;
+import java.util.Map;
 
 interface MinioFileStorageService {
 
-    void putObject(Attachment attachment, String bucket);
+    void putObject(Attachment attachment);
 
-    boolean bucketExists(String bucket);
+    boolean hasObject(String id);
 
-    void makeBucketIfNotExists(String bucket);
+    void removeObject(String id);
 
-    void removeObject(String bucket);
+    InputStream getContent(String id);
 
-    InputStream getContent(String bucket);
+    Map<String, String> getUserMetadata(String id);
 }

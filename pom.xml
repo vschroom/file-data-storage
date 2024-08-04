@@ -14,6 +14,7 @@
         <module>file-storage-api</module>
         <module>directory-file-storage</module>
         <module>minio-file-storage</module>
+        <module>example-storage-implementation</module>
     </modules>
 
     <build>
@@ -38,6 +39,11 @@
             <artifactId>junit</artifactId>
             <version>4.0</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>2.0.13</version>
         </dependency>
     </dependencies>
 </project>
