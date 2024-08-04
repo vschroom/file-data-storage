@@ -100,7 +100,7 @@ public class MinioFileStorageServiceImpl implements MinioFileStorageService {
     }
 
     private void makeBucketIfNotExists(@NonNull String bucket) {
-        var exists = this.hasObject(bucket);
+        var exists = this.hasBucket(bucket);
         if (!exists) {
             try {
                 minioClient.makeBucket(MakeBucketArgs.builder()
@@ -110,6 +110,17 @@ public class MinioFileStorageServiceImpl implements MinioFileStorageService {
                 throw new MinioFileStorageException(
                         format("Some problem while make bucket=%s", bucket), ex);
             }
+        }
+    }
+
+    private boolean hasBucket(String bucket) {
+        try {
+            return minioClient.bucketExists(BucketExistsArgs.builder()
+                    .bucket(bucket)
+                    .build());
+        } catch (Exception ex) {
+            throw new MinioFileStorageException(
+                    format("Some problem while make bucket=%s", bucket), ex);
         }
     }
 }
