@@ -16,7 +16,7 @@ public class MainApp {
 
         // store file attachment
         var fileId = "b8f7c0a6-0daf-4307-a124-39e01be794ed";
-        fileStorageApi.store(
+        var id = fileStorageApi.store(
                 new FileAttachment(fileId,
                         new ByteArrayInputStream(Files.readAllBytes(Path.of("helloworld.txt"))),
                         Map.of(
@@ -25,7 +25,8 @@ public class MainApp {
                 ));
 
         // find
-        var attachment = fileStorageApi.findBy(fileId);
+        var attachment = fileStorageApi.findBy(id)
+                .orElseThrow(() -> new IllegalArgumentException("attachment not found"));
 
         // download content
         try (var bw = new FileOutputStream("custom-dir\\test_response.txt");
@@ -35,8 +36,8 @@ public class MainApp {
         }
 
         // check existence
-        System.out.println(fileStorageApi.exists(fileId));
+        System.out.println(fileStorageApi.exists(id));
         // remove file
-//        System.out.println(fileStorageApi.remove(fileId));
+//        System.out.println(fileStorageApi.remove(id));
     }
 }

@@ -1,12 +1,14 @@
 package com.chernov;
 
+import java.util.Optional;
+
 public interface FileStorageApi {
 
-    void store(Attachment attachment);
+    String store(Attachment attachment);
 
     boolean exists(String id);
 
     boolean remove(String id);
 
-    Attachment findBy(String id);
+    Optional<Attachment> findBy(String id);
 }

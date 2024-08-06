@@ -7,9 +7,11 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
+import static java.util.Optional.of;
 
 @RequiredArgsConstructor
 public class DirectoryFileStorage implements InternalFileStorageApi {
@@ -39,11 +41,11 @@ public class DirectoryFileStorage implements InternalFileStorageApi {
     }
 
     @Override
-    public Attachment findBy(@NonNull String id) {
+    public Optional<Attachment> findBy(@NonNull String id) {
         var fileContent = fileSystemService.readFile(id);
         var metadata = fileSystemService.readMetadata(id, format("%s:*", customMetadataKey));
 
-        return new FileAttachment(id, fileContent, metadata);
+        return of(new FileAttachment(id, fileContent, metadata));
     }
 
     private Map<String, String> customizeMetadataKey(Map<String, String> metadata) {

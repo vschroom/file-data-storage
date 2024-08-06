@@ -3,14 +3,16 @@ package com.chernov;
 import com.chernov.internal.api.InternalFileStorageApi;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Optional;
+
 @RequiredArgsConstructor
 class FileStorageApiImpl implements FileStorageApi {
 
     private final InternalFileStorageApi internalFileStorageApi;
 
     @Override
-    public void store(Attachment attachment) {
-        internalFileStorageApi.store(attachment);
+    public String store(Attachment attachment) {
+        return internalFileStorageApi.store(attachment);
     }
 
     @Override
@@ -24,7 +26,7 @@ class FileStorageApiImpl implements FileStorageApi {
     }
 
     @Override
-    public Attachment findBy(String id) {
+    public Optional<Attachment> findBy(String id) {
         return internalFileStorageApi.findBy(id);
     }
 }

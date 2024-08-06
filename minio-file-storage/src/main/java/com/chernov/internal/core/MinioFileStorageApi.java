@@ -6,6 +6,10 @@ import com.chernov.internal.api.InternalFileStorageApi;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Optional;
+
+import static java.util.Optional.of;
+
 @RequiredArgsConstructor
 public class MinioFileStorageApi implements InternalFileStorageApi {
 
@@ -31,10 +35,10 @@ public class MinioFileStorageApi implements InternalFileStorageApi {
     }
 
     @Override
-    public Attachment findBy(@NonNull String id) {
+    public Optional<Attachment> findBy(@NonNull String id) {
         var content = minioFileStorageService.getContent(id);
         var userMetadata = minioFileStorageService.getUserMetadata(id);
 
-        return new FileAttachment(id, content, userMetadata);
+        return of(new FileAttachment(id, content, userMetadata));
     }
 }
