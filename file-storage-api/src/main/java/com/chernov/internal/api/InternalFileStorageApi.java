@@ -4,7 +4,7 @@ import com.chernov.Attachment;
 
 public interface InternalFileStorageApi {
 
-    void store(Attachment attachment);
+    String store(Attachment attachment);
 
     boolean exists(String id);
 

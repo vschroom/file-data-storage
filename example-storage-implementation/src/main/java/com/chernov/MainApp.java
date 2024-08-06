@@ -1,6 +1,7 @@
 package com.chernov;
 
 import java.io.ByteArrayInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,14 +28,15 @@ public class MainApp {
         var attachment = fileStorageApi.findBy(fileId);
 
         // download content
-        /*try (var bw = new FileOutputStream("test_response.txt")) {
-            bw.write(attachment.getContent().readAllBytes());
+        try (var bw = new FileOutputStream("custom-dir\\test_response.txt");
+             var content = attachment.getContent()) {
+            bw.write(content.readAllBytes());
             bw.flush();
-        }*/
+        }
 
         // check existence
         System.out.println(fileStorageApi.exists(fileId));
         // remove file
-        System.out.println(fileStorageApi.remove(fileId));
+//        System.out.println(fileStorageApi.remove(fileId));
     }
 }

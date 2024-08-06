@@ -2,96 +2,91 @@ package com.chernov.internal.core;
 
 import com.chernov.DirectoryFileStorageProperties;
 import com.chernov.internal.exceptions.*;
-import lombok.RequiredArgsConstructor;
+import lombok.NonNull;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-@RequiredArgsConstructor
 public class FileSystemServiceImpl implements FileSystemService {
 
-    private final DirectoryFileStorageProperties properties;
+    private final Path directory;
 
-    public Path uploadFile(Path path, InputStream content) {
-        // FIXME валидация для этого класса излишняя, он должен тупо работать с системным файловым хранилищем
-        validateExistence(path);
+    public FileSystemServiceImpl(DirectoryFileStorageProperties properties) {
+        this.directory = createDirectoryIfNotExists(properties.getDirectory());
+    }
 
+    @Override
+    public long uploadFile(@NonNull String filename, @NonNull InputStream content) {
         try (var in = content) {
-            Files.copy(in, path);
-
-            return path;
+            return Files.copy(in, directory.resolve(filename));
         } catch (IOException e) {
-            throw new FileUploadException(path.toString(), e);
+            throw new FileUploadException(filename, e);
         }
     }
 
-    public void addMetadata(Path path, Map<String, String> metadata) {
-        metadata.forEach((key, value) -> addMetadata(path, key, value));
+    @Override
+    public void addMetadata(@NonNull String filename, @NonNull Map<String, String> metadata) {
+        metadata.forEach((key, value) -> addMetadata(directory.resolve(filename), key, value));
     }
 
-    public InputStream readFile(Path path) {
+    @Override
+    public InputStream readFile(@NonNull String filename) {
         try {
-            return Files.newInputStream(path);
+            return Files.newInputStream(directory.resolve(filename));
         } catch (IOException ex) {
-            throw new FileReadException(path.toString());
-        }
-    }
-
-    public Map<String, String> readMetadata(Path path) {
-        try {
-            // FIXME хардкод
-            return Files.readAttributes(path, "user:*").entrySet().stream()
-                    // FIXME кодировку байт тоже нужно указать
-                    .collect(Collectors.toMap(Map.Entry::getKey, e -> new String((byte[]) e.getValue())));
-        } catch (IOException e) {
-            throw new FileMetadataReadException(path.toString(), e);
+            throw new FileReadException(filename);
         }
     }
 
     @Override
-    public boolean existsFile(Path path) {
-        return Files.exists(path);
+    public boolean existsFile(@NonNull String filename) {
+        return Files.exists(directory.resolve(filename));
     }
 
     @Override
-    public boolean removeFile(Path path) {
+    public boolean removeFile(@NonNull String filename) {
         try {
-            return Files.deleteIfExists(path);
+            return Files.deleteIfExists(directory.resolve(filename));
         } catch (IOException e) {
-            throw new FileDeleteException(path.toString(), e);
+            throw new FileDeleteException(filename, e);
+        }
+    }
+
+    @Override
+    public Map<String, String> readMetadata(@NonNull String filename, @NonNull String metadataKey) {
+        try {
+            return Files.readAttributes(directory.resolve(filename), metadataKey).entrySet().stream()
+                    .collect(Collectors.toMap(Map.Entry::getKey, e -> new String((byte[]) e.getValue(), Charset.defaultCharset())));
+        } catch (IOException e) {
+            throw new FileMetadataReadException(filename, e);
         }
     }
 
     private void addMetadata(Path path, String key, String value) {
-        // FIXME хардкод
-        var userKey = format("user:%s", key);
         try {
-            Files.setAttribute(path, userKey, value.getBytes(UTF_8));
+            Files.setAttribute(path, key, value.getBytes(UTF_8));
         } catch (IOException e) {
             throw new FileUploadMetadataException(path.toString(), e);
         }
     }
 
-    private void validateExistence(Path path) {
-        var existsFile = existsFile(path);
-        if (existsFile) {
-            throw new FileAlreadyExistsException(path.toString());
-        }
-    }
-
-    public Path createDirectoriesByProperty() {
-        var directories = properties.getDirectories();
+    private Path createDirectoryIfNotExists(Path directory) {
         try {
-            return Files.createDirectories(directories);
+            var directoryExists = Files.exists(directory);
+            if (!directoryExists) {
+                return Files.createDirectory(directory);
+            }
+
+            return directory;
         } catch (IOException e) {
-            throw new FileCreateDirectoryException(directories.toString(), e);
+            throw new FileCreateException(directory.toString(), e);
         }
     }
 }

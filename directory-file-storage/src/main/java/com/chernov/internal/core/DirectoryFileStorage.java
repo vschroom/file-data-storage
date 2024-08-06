@@ -3,51 +3,51 @@ package com.chernov.internal.core;
 import com.chernov.Attachment;
 import com.chernov.FileAttachment;
 import com.chernov.internal.api.InternalFileStorageApi;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
-import java.nio.file.Path;
-import java.util.Collection;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import static java.lang.String.format;
 
 @RequiredArgsConstructor
 public class DirectoryFileStorage implements InternalFileStorageApi {
 
     private final FileSystemService fileSystemService;
+    private final String customMetadataKey;
 
     @Override
-    public void store(Attachment attachment) {
-        var path = fileSystemService.uploadFile(toPath(attachment.getId()), attachment.getContent());
-        fileSystemService.addMetadata(path, attachment.getMetadata());
+    public String store(@NonNull Attachment attachment) {
+        var attachmentId = attachment.getId();
+        fileSystemService.uploadFile(attachmentId, attachment.getContent());
+
+        var metadata = customizeMetadataKey(attachment.getMetadata());
+        fileSystemService.addMetadata(attachmentId, metadata);
+
+        return attachmentId;
     }
 
     @Override
-    public boolean exists(String id) {
-        return fileSystemService.existsFile(toPath(id));
+    public boolean exists(@NonNull String id) {
+        return fileSystemService.existsFile(id);
     }
 
     @Override
-    public boolean remove(String id) {
-        return fileSystemService.removeFile(toPath(id));
+    public boolean remove(@NonNull String id) {
+        return fileSystemService.removeFile(id);
     }
 
     @Override
-    public Attachment findBy(String id) {
-        var fileContent = fileSystemService.readFile(toPath(id));
-        var metadata = fileSystemService.readMetadata(toPath(id));
+    public Attachment findBy(@NonNull String id) {
+        var fileContent = fileSystemService.readFile(id);
+        var metadata = fileSystemService.readMetadata(id, format("%s:*", customMetadataKey));
 
         return new FileAttachment(id, fileContent, metadata);
     }
 
-    // FIXME для чего этот метод?
-    private String joinUserMetadataKeys(Collection<String> metadataKeys) {
-        return String.join(",", metadataKeys);
-    }
-
-    private Path toPath(String path) {
-        return createDirectoriesByProperty().resolve(Path.of(path));
-    }
-
-    // FIXME так же как с минию, зачем нам на каждом бедном запросе проверять созданы ли рабочая диретория? Видимо есть какой то концептуальный пробел
-    private Path createDirectoriesByProperty() {
-        return fileSystemService.createDirectoriesByProperty();
+    private Map<String, String> customizeMetadataKey(Map<String, String> metadata) {
+        return metadata.entrySet().stream()
+                .collect(Collectors.toMap(k -> format("%s:%s", customMetadataKey, k.getKey()), Map.Entry::getValue));
     }
 }

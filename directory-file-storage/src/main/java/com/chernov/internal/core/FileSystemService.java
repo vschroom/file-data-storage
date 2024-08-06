@@ -1,22 +1,19 @@
 package com.chernov.internal.core;
 
 import java.io.InputStream;
-import java.nio.file.Path;
 import java.util.Map;
 
-interface FileSystemService {
+public interface FileSystemService {
 
-    Path uploadFile(Path path, InputStream content);
+    long uploadFile(String filename, InputStream content);
 
-    void addMetadata(Path path, Map<String, String> metadata);
+    void addMetadata(String filename, Map<String, String> metadata);
 
-    InputStream readFile(Path path);
+    InputStream readFile(String filename);
 
-    Map<String, String> readMetadata(Path path);
+    Map<String, String> readMetadata(String filename, String metadataKey);
 
-    boolean existsFile(Path path);
+    boolean existsFile(String filename);
 
-    boolean removeFile(Path path);
-
-    Path createDirectoriesByProperty();
+    boolean removeFile(String filename);
 }

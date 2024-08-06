@@ -4,8 +4,6 @@ import com.chernov.MinioFileStorageProperties;
 import io.minio.MinioClient;
 import lombok.RequiredArgsConstructor;
 
-import java.util.UUID;
-
 import static java.util.Optional.ofNullable;
 
 @RequiredArgsConstructor

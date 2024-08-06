@@ -12,8 +12,10 @@ public class MinioFileStorageApi implements InternalFileStorageApi {
     private final MinioFileStorageService minioFileStorageService;
 
     @Override
-    public void store(@NonNull Attachment attachment) {
+    public String store(@NonNull Attachment attachment) {
         minioFileStorageService.putObject(attachment);
+
+        return attachment.getId();
     }
 
     @Override

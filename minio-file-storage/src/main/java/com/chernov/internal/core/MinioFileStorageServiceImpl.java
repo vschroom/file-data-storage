@@ -3,11 +3,11 @@ package com.chernov.internal.core;
 import com.chernov.Attachment;
 import com.chernov.internal.exceptions.MinioFileStorageException;
 import io.minio.*;
+import io.minio.errors.ErrorResponseException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Map;
 
@@ -16,6 +16,8 @@ import static java.lang.String.format;
 @Slf4j
 @RequiredArgsConstructor
 public class MinioFileStorageServiceImpl implements MinioFileStorageService {
+
+    private static final String NO_SUCH_KEY_ERROR_CODE = "NoSuchKey";
 
     private final MinioClient minioClient;
     private final String bucket;
@@ -46,10 +48,15 @@ public class MinioFileStorageServiceImpl implements MinioFileStorageService {
                     .build());
 
             return objectResponse != null;
+        } catch (ErrorResponseException ex) {
+            if (NO_SUCH_KEY_ERROR_CODE.equals(ex.errorResponse().code())) {
+                return false;
+            }
+            throw new MinioFileStorageException(
+                    format("Some problem while put object=%s with bucket=%s", id, bucket), ex);
         } catch (Exception ex) {
-            log.error("Some problem while put object={} with bucket={}", id, bucket, ex);
-            // FIXME получается что мы словили ошибку но как ни в чем не бывало продолжаем? или я неверно понял?
-            return false;
+            throw new MinioFileStorageException(
+                    format("Some problem while put object=%s with bucket=%s", id, bucket), ex);
         }
     }
 
@@ -70,14 +77,12 @@ public class MinioFileStorageServiceImpl implements MinioFileStorageService {
     @Override
     public InputStream getContent(@NonNull String id) {
         try {
-            var content = minioClient.getObject(
+            return minioClient.getObject(
                     GetObjectArgs.builder()
                             .object(id)
                             .bucket(bucket)
                             .build()
-            ).readAllBytes(); // FIXME а зачем ты это делаешь?
-
-            return new ByteArrayInputStream(content);
+            );
         } catch (Exception ex) {
             throw new MinioFileStorageException(
                     format("Some problem while getting object=%s by bucket=%s", id, bucket), ex);
