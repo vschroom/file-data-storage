@@ -24,6 +24,7 @@ public class MinioFileStorageServiceImpl implements MinioFileStorageService {
 
     @Override
     public void putObject(@NonNull Attachment attachment) {
+        //FIXME опять создаем бакеты во время работы?
         makeBucketIfNotExists(bucket);
         try (var bw = attachment.getContent()) {
             minioClient.putObject(

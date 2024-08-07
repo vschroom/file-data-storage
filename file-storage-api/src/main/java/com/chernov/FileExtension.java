@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.stream.Stream;
 
+// FIXME а я передал jpeg. Что делать?
 @Getter
 @RequiredArgsConstructor
 public enum FileExtension {

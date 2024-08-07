@@ -19,6 +19,7 @@ public class MainApp {
         var fileId = "1";
         var id = fileStorageApi.store(
                 new FileAttachment(fileId,
+                        // FIXME Зачем в ByteArrayInputStream?
                         new ByteArrayInputStream(Files.readAllBytes(Path.of("helloworld.txt"))),
                         new HashMap<>(
                                 Map.of(

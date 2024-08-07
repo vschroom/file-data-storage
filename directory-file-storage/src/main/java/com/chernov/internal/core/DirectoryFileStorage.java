@@ -20,6 +20,7 @@ public class DirectoryFileStorage implements InternalFileStorageApi {
     private static final String USER_METADATA_KEY = "user";
     private static final String INITIAL_FILENAME = "initial_filename";
     private static final String INITIAL_EXTENSION = "initial_extension";
+
     private final FileSystemService fileSystemService;
 
     @Override
@@ -30,6 +31,7 @@ public class DirectoryFileStorage implements InternalFileStorageApi {
         var metadata = customizeMetadataKey(attachment.getMetadata());
         addDefaultMetadata(metadata, attachment);
         fileSystemService.addMetadata(attachmentId, metadata);
+        // FIXME что будет если файл сохранился а метаданные нет?
 
         return attachmentId;
     }
@@ -46,6 +48,7 @@ public class DirectoryFileStorage implements InternalFileStorageApi {
 
     @Override
     public Optional<Attachment> findBy(@NonNull String id) {
+        //FIXME а если такого файла нет?
         var fileContent = fileSystemService.readFile(id);
         var metadata = fileSystemService.readMetadata(id, format("%s:*", USER_METADATA_KEY));
         var filename = metadata.get(INITIAL_FILENAME);

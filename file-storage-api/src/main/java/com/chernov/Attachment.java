@@ -15,5 +15,6 @@ public interface Attachment {
 
     FileExtension getFileExtension();
 
+    // FIXME у каждого файла может быть свой сбособ работы с id?
     GeneratorTypeId getGeneratorTypeId();
 }
