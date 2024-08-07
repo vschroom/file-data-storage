@@ -12,6 +12,6 @@ public class DirectoryFileStorageFactory {
                 ? new ZipFileSystemServiceImpl(directoryFileStorageProperties)
                 : new FileSystemServiceImpl(directoryFileStorageProperties);
 
-        return () -> new DirectoryFileStorage(fileSystemService, directoryFileStorageProperties.getCustomMetadataKey());
+        return () -> new DirectoryFileStorage(fileSystemService);
     }
 }

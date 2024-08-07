@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.Map;
 
 public class MainApp {
@@ -15,13 +16,19 @@ public class MainApp {
 //        var fileStorageApi = DirectoryStorageConfig.fileStorageApi();
 
         // store file attachment
-        var fileId = "b8f7c0a6-0daf-4307-a124-39e01be794ed";
+        var fileId = "1";
         var id = fileStorageApi.store(
                 new FileAttachment(fileId,
                         new ByteArrayInputStream(Files.readAllBytes(Path.of("helloworld.txt"))),
-                        Map.of(
+                        new HashMap<>(
+                                Map.of(
                                 "user_created", "user123",
                                 "filename", "helloworld.txt")
+                        ),
+                        "helloworld",
+                                FileExtension.TXT,
+                        GeneratorTypeId.CUSTOM_GENERATOR,
+                        new CustomGeneratorId()
                 ));
 
         // find

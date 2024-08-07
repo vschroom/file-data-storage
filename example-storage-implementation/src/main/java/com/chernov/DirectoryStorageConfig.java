@@ -9,6 +9,6 @@ public class DirectoryStorageConfig {
     public static FileStorageApi fileStorageApi() {
         return FileStorageApiFactory.create(
                 DirectoryFileStorageFactory.create(
-                        new DirectoryFileStorageProperties(Path.of("custom-dir"), StorageType.ZIP, "user-key")));
+                        new DirectoryFileStorageProperties(Path.of("custom-dir"), StorageType.ZIP)));
     }
 }

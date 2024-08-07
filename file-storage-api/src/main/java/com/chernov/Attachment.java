@@ -10,4 +10,10 @@ public interface Attachment {
     InputStream getContent();
 
     Map<String, String> getMetadata();
+
+    String getFilename();
+
+    FileExtension getFileExtension();
+
+    GeneratorTypeId getGeneratorTypeId();
 }

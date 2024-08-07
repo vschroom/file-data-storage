@@ -16,15 +16,9 @@ public class DirectoryFileStorageProperties {
 
     private Path directory;
     private StorageType storageType;
-    private String customMetadataKey;
 
     public Path getDirectory() {
         return ofNullable(this.directory)
                 .orElseGet(() -> Path.of("default-dir"));
-    }
-
-    public String getCustomMetadataKey() {
-        return ofNullable(customMetadataKey)
-                .orElse("user");
     }
 }
