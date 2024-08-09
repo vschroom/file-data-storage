@@ -13,8 +13,5 @@ public interface Attachment {
 
     String getFilename();
 
-    FileExtension getFileExtension();
-
-    // FIXME у каждого файла может быть свой сбособ работы с id?
-    GeneratorTypeId getGeneratorTypeId();
+    String getFileExtension();
 }

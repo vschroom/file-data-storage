@@ -7,7 +7,7 @@ import java.util.Map;
 
 interface MinioFileStorageService {
 
-    void putObject(Attachment attachment);
+    void putObject(String id, Attachment attachment);
 
     boolean hasObject(String id);
 

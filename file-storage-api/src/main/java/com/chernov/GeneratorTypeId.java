@@ -2,7 +2,7 @@ package com.chernov;
 
 public enum GeneratorTypeId {
 
-    CUSTOM,
+    LIB_GENERATOR,
     DEFAULT,
     CUSTOM_GENERATOR
 }

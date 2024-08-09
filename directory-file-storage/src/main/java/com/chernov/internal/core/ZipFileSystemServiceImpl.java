@@ -28,7 +28,7 @@ public class ZipFileSystemServiceImpl implements FileSystemService {
     }
 
     @Override
-    public long uploadFile(@NonNull String filename, @NonNull InputStream content) {
+    public long uploadFile(@NonNull String filename, @NonNull InputStream content) throws IoFileUploadException {
         var resultPath = resolveZipPath(filename).toString();
         try (var out = new ZipOutputStream(new FileOutputStream(resultPath));
              var in = content) {
@@ -37,20 +37,27 @@ public class ZipFileSystemServiceImpl implements FileSystemService {
 
             return in.transferTo(out);
         } catch (IOException e) {
-            throw new FileUploadException(filename, e);
+            throw new IoFileUploadException(resultPath, e);
         }
     }
 
     @Override
-    public void addMetadata(@NonNull String filename, @NonNull Map<String, String> metadata) {
-        metadata.forEach((key, value) -> addMetadata(
-                resolveZipPath(filename), key, value));
+    public void addMetadata(@NonNull String filename, @NonNull Map<String, String> metadata) throws IoFileUploadMetadataException {
+        var resultPath = resolveZipPath(filename);
+        for (var meta : metadata.entrySet()) {
+            try {
+                Files.setAttribute(resultPath, meta.getKey(), meta.getValue().getBytes(UTF_8));
+            } catch (IOException e) {
+                throw new IoFileUploadMetadataException(resultPath.toString(), e);
+            }
+        }
     }
 
     @Override
-    public InputStream readFile(@NonNull String filename) {
+    public InputStream readFile(@NonNull String filename) throws IoFileReadException {
+        var resultPath = resolveZipPath(filename).toString();
         try {
-            var zipFile = new ZipFile(resolveZipPath(filename).toString(), Charset.defaultCharset());
+            var zipFile = new ZipFile(resultPath, Charset.defaultCharset());
             var zipInputStream = zipFile.getInputStream(zipFile.entries().nextElement());
 
             return new InputStream() {
@@ -67,17 +74,18 @@ public class ZipFileSystemServiceImpl implements FileSystemService {
                 }
             };
         } catch (IOException ex) {
-            throw new FileReadException(filename);
+            throw new IoFileReadException(resultPath, ex);
         }
     }
 
     @Override
-    public Map<String, String> readMetadata(@NonNull String filename, @NonNull String metadataKey) {
+    public Map<String, String> readMetadata(@NonNull String filename, @NonNull String metadataKey) throws IoFileMetadataReadException {
+        var resultPath = resolveZipPath(filename);
         try {
-            return Files.readAttributes(resolveZipPath(filename), metadataKey).entrySet().stream()
+            return Files.readAttributes(resultPath, metadataKey).entrySet().stream()
                     .collect(Collectors.toMap(Map.Entry::getKey, e -> new String((byte[]) e.getValue(), Charset.defaultCharset())));
         } catch (IOException e) {
-            throw new FileMetadataReadException(filename, e);
+            throw new IoFileMetadataReadException(resultPath.toString(), e);
         }
     }
 
@@ -104,14 +112,6 @@ public class ZipFileSystemServiceImpl implements FileSystemService {
                     : directory;
         } catch (IOException e) {
             throw new FileCreateException(directory.toString(), e);
-        }
-    }
-
-    private void addMetadata(Path path, String key, String value) {
-        try {
-            Files.setAttribute(path, key, value.getBytes(UTF_8));
-        } catch (IOException e) {
-            throw new FileUploadMetadataException(path.toString(), e);
         }
     }
 

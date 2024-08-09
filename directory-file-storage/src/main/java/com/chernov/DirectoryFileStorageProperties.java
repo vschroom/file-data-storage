@@ -16,6 +16,8 @@ public class DirectoryFileStorageProperties {
 
     private Path directory;
     private StorageType storageType;
+    private GeneratorTypeId generatorTypeId;
+    private GeneratorIdService generatorIdService;
 
     public Path getDirectory() {
         return ofNullable(this.directory)

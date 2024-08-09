@@ -5,7 +5,6 @@ import com.chernov.internal.exceptions.MinioFileStorageException;
 import io.minio.*;
 import io.minio.errors.ErrorResponseException;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.InputStream;
@@ -14,7 +13,6 @@ import java.util.Map;
 import static java.lang.String.format;
 
 @Slf4j
-@RequiredArgsConstructor
 public class MinioFileStorageServiceImpl implements MinioFileStorageService {
 
     private static final String NO_SUCH_KEY_ERROR_CODE = "NoSuchKey";
@@ -22,14 +20,17 @@ public class MinioFileStorageServiceImpl implements MinioFileStorageService {
     private final MinioClient minioClient;
     private final String bucket;
 
+    public MinioFileStorageServiceImpl(MinioClient minioClient, String bucket) {
+        this.minioClient = minioClient;
+        this.bucket = makeBucketIfNotExists(bucket);
+    }
+
     @Override
-    public void putObject(@NonNull Attachment attachment) {
-        //FIXME опять создаем бакеты во время работы?
-        makeBucketIfNotExists(bucket);
+    public void putObject(@NonNull String id, @NonNull Attachment attachment) {
         try (var bw = attachment.getContent()) {
             minioClient.putObject(
                     PutObjectArgs.builder()
-                            .object(attachment.getId())
+                            .object(id)
                             .stream(bw, bw.available(), -1)
                             .bucket(bucket)
                             .userMetadata(attachment.getMetadata())
@@ -105,7 +106,7 @@ public class MinioFileStorageServiceImpl implements MinioFileStorageService {
         }
     }
 
-    private void makeBucketIfNotExists(@NonNull String bucket) {
+    private String makeBucketIfNotExists(@NonNull String bucket) {
         var exists = this.hasBucket(bucket);
         if (!exists) {
             try {
@@ -117,6 +118,8 @@ public class MinioFileStorageServiceImpl implements MinioFileStorageService {
                         format("Some problem while make bucket=%s", bucket), ex);
             }
         }
+
+        return bucket;
     }
 
     private boolean hasBucket(String bucket) {

@@ -23,25 +23,33 @@ public class FileSystemServiceImpl implements FileSystemService {
     }
 
     @Override
-    public long uploadFile(@NonNull String filename, @NonNull InputStream content) {
+    public long uploadFile(@NonNull String filename, @NonNull InputStream content) throws IoFileUploadException {
         try (var in = content) {
             return Files.copy(in, directory.resolve(filename));
         } catch (IOException e) {
-            throw new FileUploadException(filename, e);
+            throw new IoFileUploadException(filename, e);
         }
     }
 
     @Override
-    public void addMetadata(@NonNull String filename, @NonNull Map<String, String> metadata) {
-        metadata.forEach((key, value) -> addMetadata(directory.resolve(filename), key, value));
+    public void addMetadata(@NonNull String filename, @NonNull Map<String, String> metadata) throws IoFileUploadMetadataException {
+        var resultPath = directory.resolve(filename);
+        for (var meta : metadata.entrySet()) {
+            try {
+                Files.setAttribute(resultPath, meta.getKey(), meta.getValue().getBytes(UTF_8));
+            } catch (IOException e) {
+                throw new IoFileUploadMetadataException(resultPath.toString(), e);
+            }
+        }
     }
 
     @Override
-    public InputStream readFile(@NonNull String filename) {
+    public InputStream readFile(@NonNull String filename) throws IoFileReadException {
+        var resultPath = directory.resolve(filename);
         try {
-            return Files.newInputStream(directory.resolve(filename));
+            return Files.newInputStream(resultPath);
         } catch (IOException ex) {
-            throw new FileReadException(filename);
+            throw new IoFileReadException(resultPath.toString(), ex);
         }
     }
 
@@ -60,20 +68,13 @@ public class FileSystemServiceImpl implements FileSystemService {
     }
 
     @Override
-    public Map<String, String> readMetadata(@NonNull String filename, @NonNull String metadataKey) {
+    public Map<String, String> readMetadata(@NonNull String filename, @NonNull String metadataKey) throws IoFileMetadataReadException {
+        var resultPath = directory.resolve(filename);
         try {
-            return Files.readAttributes(directory.resolve(filename), metadataKey).entrySet().stream()
+            return Files.readAttributes(resultPath, metadataKey).entrySet().stream()
                     .collect(Collectors.toMap(Map.Entry::getKey, e -> new String((byte[]) e.getValue(), Charset.defaultCharset())));
         } catch (IOException e) {
-            throw new FileMetadataReadException(filename, e);
-        }
-    }
-
-    private void addMetadata(Path path, String key, String value) {
-        try {
-            Files.setAttribute(path, key, value.getBytes(UTF_8));
-        } catch (IOException e) {
-            throw new FileUploadMetadataException(path.toString(), e);
+            throw new IoFileMetadataReadException(resultPath.toString(), e);
         }
     }
 

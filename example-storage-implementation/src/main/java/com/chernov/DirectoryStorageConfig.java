@@ -9,6 +9,10 @@ public class DirectoryStorageConfig {
     public static FileStorageApi fileStorageApi() {
         return FileStorageApiFactory.create(
                 DirectoryFileStorageFactory.create(
-                        new DirectoryFileStorageProperties(Path.of("custom-dir"), StorageType.ZIP)));
+                        new DirectoryFileStorageProperties(
+                                Path.of("custom-dir"),
+                                StorageType.ZIP,
+                                GeneratorTypeId.CUSTOM_GENERATOR,
+                                new CustomGeneratorId())));
     }
 }

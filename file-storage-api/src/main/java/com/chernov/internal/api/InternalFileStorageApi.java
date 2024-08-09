@@ -2,8 +2,6 @@ package com.chernov.internal.api;
 
 import com.chernov.Attachment;
 
-import java.util.Optional;
-
 public interface InternalFileStorageApi {
 
     String store(Attachment attachment);
@@ -12,5 +10,5 @@ public interface InternalFileStorageApi {
 
     boolean remove(String id);
 
-    Optional<Attachment> findBy(String id);
+    Attachment findBy(String id);
 }

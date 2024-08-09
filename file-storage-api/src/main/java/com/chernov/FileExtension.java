@@ -3,9 +3,6 @@ package com.chernov;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import java.util.stream.Stream;
-
-// FIXME а я передал jpeg. Что делать?
 @Getter
 @RequiredArgsConstructor
 public enum FileExtension {
@@ -18,11 +15,4 @@ public enum FileExtension {
     EMPTY_EXT("");
 
     private final String value;
-
-    public static FileExtension parse(String extension) {
-        return Stream.of(FileExtension.values())
-                .filter(fe -> fe.getValue().equals(extension))
-                .findFirst()
-                .orElse(EMPTY_EXT);
-    }
 }

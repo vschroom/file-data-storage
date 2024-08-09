@@ -1,6 +1,5 @@
 package com.chernov;
 
-import java.io.ByteArrayInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -19,22 +18,18 @@ public class MainApp {
         var fileId = "1";
         var id = fileStorageApi.store(
                 new FileAttachment(fileId,
-                        // FIXME Зачем в ByteArrayInputStream?
-                        new ByteArrayInputStream(Files.readAllBytes(Path.of("helloworld.txt"))),
+                        Files.newInputStream(Path.of("helloworld.txt")),
                         new HashMap<>(
                                 Map.of(
-                                "user_created", "user123",
-                                "filename", "helloworld.txt")
+                                        "user_created", "user123",
+                                        "filename", "helloworld.txt")
                         ),
                         "helloworld",
-                                FileExtension.TXT,
-                        GeneratorTypeId.CUSTOM_GENERATOR,
-                        new CustomGeneratorId()
+                        FileExtension.TXT.getValue()
                 ));
 
         // find
-        var attachment = fileStorageApi.findBy(id)
-                .orElseThrow(() -> new IllegalArgumentException("attachment not found"));
+        var attachment = fileStorageApi.findBy(id);
 
         // download content
         try (var bw = new FileOutputStream("custom-dir\\test_response.txt");

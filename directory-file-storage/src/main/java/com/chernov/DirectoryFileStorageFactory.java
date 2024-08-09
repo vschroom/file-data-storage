@@ -12,6 +12,9 @@ public class DirectoryFileStorageFactory {
                 ? new ZipFileSystemServiceImpl(directoryFileStorageProperties)
                 : new FileSystemServiceImpl(directoryFileStorageProperties);
 
-        return () -> new DirectoryFileStorage(fileSystemService);
+        return () -> new DirectoryFileStorage(
+                fileSystemService,
+                directoryFileStorageProperties.getGeneratorTypeId(),
+                directoryFileStorageProperties.getGeneratorIdService());
     }
 }

@@ -6,7 +6,7 @@ import static java.lang.String.format;
 
 public class FileReadException extends FileStorageException {
 
-    public FileReadException(String path) {
-        super(format("Error while read file: %s", path));
+    public FileReadException(String id, Throwable ex) {
+        super(format("Error while read file with id=%s", id), ex);
     }
 }

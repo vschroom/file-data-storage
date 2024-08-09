@@ -1,18 +1,16 @@
 package com.chernov.internal.core;
 
-import com.chernov.Attachment;
-import com.chernov.FileAttachment;
-import com.chernov.FileExtension;
+import com.chernov.*;
 import com.chernov.internal.api.InternalFileStorageApi;
+import com.chernov.internal.api.UuidComponent;
+import com.chernov.internal.exceptions.*;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
-import static java.util.Optional.of;
 
 @RequiredArgsConstructor
 public class DirectoryFileStorage implements InternalFileStorageApi {
@@ -22,16 +20,26 @@ public class DirectoryFileStorage implements InternalFileStorageApi {
     private static final String INITIAL_EXTENSION = "initial_extension";
 
     private final FileSystemService fileSystemService;
+    private final GeneratorTypeId generatorTypeId;
+    private final GeneratorIdService generatorIdService;
 
     @Override
     public String store(@NonNull Attachment attachment) {
-        var attachmentId = attachment.getId();
-        fileSystemService.uploadFile(attachmentId, attachment.getContent());
+        var attachmentId = defineAttachmentId(attachment);
 
-        var metadata = customizeMetadataKey(attachment.getMetadata());
-        addDefaultMetadata(metadata, attachment);
-        fileSystemService.addMetadata(attachmentId, metadata);
-        // FIXME что будет если файл сохранился а метаданные нет?
+        try {
+            fileSystemService.uploadFile(attachmentId, attachment.getContent());
+
+            var metadata = customizeMetadataKey(attachment.getMetadata());
+            addDefaultMetadata(metadata, attachment);
+            fileSystemService.addMetadata(attachmentId, metadata);
+        } catch (IoFileUploadException ex) {
+            throw new FileUploadException(attachmentId, ex);
+        } catch (IoFileUploadMetadataException ex) {
+            this.remove(attachmentId);
+
+            throw new FileUploadMetadataException(attachmentId, ex);
+        }
 
         return attachmentId;
     }
@@ -47,14 +55,19 @@ public class DirectoryFileStorage implements InternalFileStorageApi {
     }
 
     @Override
-    public Optional<Attachment> findBy(@NonNull String id) {
-        //FIXME а если такого файла нет?
-        var fileContent = fileSystemService.readFile(id);
-        var metadata = fileSystemService.readMetadata(id, format("%s:*", USER_METADATA_KEY));
-        var filename = metadata.get(INITIAL_FILENAME);
-        var extension = FileExtension.parse(metadata.get(INITIAL_EXTENSION));
+    public Attachment findBy(@NonNull String id) {
+        try {
+            var fileContent = fileSystemService.readFile(id);
+            var metadata = fileSystemService.readMetadata(id, format("%s:*", USER_METADATA_KEY));
+            var filename = metadata.get(INITIAL_FILENAME);
+            var extension = metadata.get(INITIAL_EXTENSION);
 
-        return of(new FileAttachment(id, fileContent, metadata, filename, extension));
+            return new FileAttachment(id, fileContent, metadata, filename, extension);
+        } catch (IoFileReadException ex) {
+            throw new FileReadException(id, ex);
+        } catch (IoFileMetadataReadException ex) {
+            throw new FileMetadataReadException(id, ex);
+        }
     }
 
     private Map<String, String> customizeMetadataKey(Map<String, String> metadata) {
@@ -64,6 +77,17 @@ public class DirectoryFileStorage implements InternalFileStorageApi {
 
     private void addDefaultMetadata(Map<String, String> metadata, Attachment attachment) {
         metadata.put(format("%s:%s", USER_METADATA_KEY, INITIAL_FILENAME), attachment.getFilename());
-        metadata.put(format("%s:%s", USER_METADATA_KEY, INITIAL_EXTENSION), attachment.getFileExtension().getValue());
+        metadata.put(format("%s:%s", USER_METADATA_KEY, INITIAL_EXTENSION), attachment.getFileExtension());
+    }
+
+    private String defineAttachmentId(Attachment attachment) {
+        switch (this.generatorTypeId) {
+            case CUSTOM_GENERATOR:
+                return generatorIdService.generateId();
+            case LIB_GENERATOR:
+                return new DefaultGeneratorIdService(new UuidComponent()).generateId();
+            default:
+                return attachment.getId();
+        }
     }
 }

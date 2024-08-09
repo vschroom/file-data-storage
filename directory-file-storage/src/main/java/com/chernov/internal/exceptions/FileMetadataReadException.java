@@ -6,7 +6,7 @@ import static java.lang.String.format;
 
 public class FileMetadataReadException extends FileStorageException {
 
-    public FileMetadataReadException(String path, Throwable ex) {
-        super(format("Error while read metadata from path: %s", path), ex);
+    public FileMetadataReadException(String id, Throwable ex) {
+        super(format("Error while read metadata for attachment with id: %s", id), ex);
     }
 }
