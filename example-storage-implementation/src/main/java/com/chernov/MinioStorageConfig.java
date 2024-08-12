@@ -1,5 +1,7 @@
 package com.chernov;
 
+import com.chernov.internal.domain.GeneratorTypeId;
+
 public class MinioStorageConfig {
 
     public static FileStorageApi fileStorageApi() {
@@ -8,8 +10,7 @@ public class MinioStorageConfig {
                         "http://localhost:9000",
                         "admin",
                         "12345678",
-                        null,
-                        GeneratorTypeId.CUSTOM_GENERATOR,
-                        new CustomGeneratorId())));
+                        "user-bucket",
+                        GeneratorTypeId.CUSTOM_GENERATOR), new CustomFileStorageId()));
     }
 }

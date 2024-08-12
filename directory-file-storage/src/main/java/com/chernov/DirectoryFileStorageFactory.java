@@ -7,14 +7,17 @@ import com.chernov.internal.core.ZipFileSystemServiceImpl;
 
 public class DirectoryFileStorageFactory {
 
-    public static Contract create(DirectoryFileStorageProperties directoryFileStorageProperties) {
+    public static Contract create(DirectoryFileStorageProperties directoryFileStorageProperties,
+                                  FileStorageIdGenerator customFileStorageIdGenerator) {
+        var directory = directoryFileStorageProperties.getDirectory();
         var fileSystemService = directoryFileStorageProperties.getStorageType() == StorageType.ZIP
-                ? new ZipFileSystemServiceImpl(directoryFileStorageProperties)
-                : new FileSystemServiceImpl(directoryFileStorageProperties);
+                ? new ZipFileSystemServiceImpl(directory)
+                : new FileSystemServiceImpl(directory);
+        fileSystemService.createDirectoryIfNotExists(directory);
 
-        return () -> new DirectoryFileStorage(
-                fileSystemService,
-                directoryFileStorageProperties.getGeneratorTypeId(),
-                directoryFileStorageProperties.getGeneratorIdService());
+        var fileStorageIdGenerator = FileStorageIdGeneratorFactory.create(
+                directoryFileStorageProperties.getGeneratorTypeId(), customFileStorageIdGenerator);
+
+        return () -> new DirectoryFileStorage(fileSystemService, fileStorageIdGenerator);
     }
 }

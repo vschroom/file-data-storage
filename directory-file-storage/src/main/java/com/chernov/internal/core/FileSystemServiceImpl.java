@@ -1,8 +1,9 @@
 package com.chernov.internal.core;
 
-import com.chernov.DirectoryFileStorageProperties;
-import com.chernov.internal.exceptions.*;
+import com.chernov.internal.exceptions.FileCreateException;
+import com.chernov.internal.exceptions.FileDeleteException;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,43 +15,31 @@ import java.util.stream.Collectors;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+@RequiredArgsConstructor
 public class FileSystemServiceImpl implements FileSystemService {
 
     private final Path directory;
 
-    public FileSystemServiceImpl(DirectoryFileStorageProperties properties) {
-        this.directory = createDirectoryIfNotExists(properties.getDirectory());
-    }
-
     @Override
-    public long uploadFile(@NonNull String filename, @NonNull InputStream content) throws IoFileUploadException {
+    public long uploadFile(@NonNull String filename, @NonNull InputStream content) throws IOException {
         try (var in = content) {
             return Files.copy(in, directory.resolve(filename));
-        } catch (IOException e) {
-            throw new IoFileUploadException(filename, e);
         }
     }
 
     @Override
-    public void addMetadata(@NonNull String filename, @NonNull Map<String, String> metadata) throws IoFileUploadMetadataException {
+    public void addMetadata(@NonNull String filename, @NonNull Map<String, String> metadata) throws IOException {
         var resultPath = directory.resolve(filename);
         for (var meta : metadata.entrySet()) {
-            try {
-                Files.setAttribute(resultPath, meta.getKey(), meta.getValue().getBytes(UTF_8));
-            } catch (IOException e) {
-                throw new IoFileUploadMetadataException(resultPath.toString(), e);
-            }
+            Files.setAttribute(resultPath, meta.getKey(), meta.getValue().getBytes(UTF_8));
         }
     }
 
     @Override
-    public InputStream readFile(@NonNull String filename) throws IoFileReadException {
+    public InputStream readFile(@NonNull String filename) throws IOException {
         var resultPath = directory.resolve(filename);
-        try {
-            return Files.newInputStream(resultPath);
-        } catch (IOException ex) {
-            throw new IoFileReadException(resultPath.toString(), ex);
-        }
+
+        return Files.newInputStream(resultPath);
     }
 
     @Override
@@ -68,24 +57,20 @@ public class FileSystemServiceImpl implements FileSystemService {
     }
 
     @Override
-    public Map<String, String> readMetadata(@NonNull String filename, @NonNull String metadataKey) throws IoFileMetadataReadException {
+    public Map<String, String> readMetadata(@NonNull String filename, @NonNull String metadataKey) throws IOException {
         var resultPath = directory.resolve(filename);
-        try {
-            return Files.readAttributes(resultPath, metadataKey).entrySet().stream()
-                    .collect(Collectors.toMap(Map.Entry::getKey, e -> new String((byte[]) e.getValue(), Charset.defaultCharset())));
-        } catch (IOException e) {
-            throw new IoFileMetadataReadException(resultPath.toString(), e);
-        }
+
+        return Files.readAttributes(resultPath, metadataKey).entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> new String((byte[]) e.getValue(), Charset.defaultCharset())));
     }
 
-    private Path createDirectoryIfNotExists(Path directory) {
+    @Override
+    public void createDirectoryIfNotExists(Path directory) {
         try {
             var directoryExists = Files.exists(directory);
             if (!directoryExists) {
-                return Files.createDirectory(directory);
+                Files.createDirectory(directory);
             }
-
-            return directory;
         } catch (IOException e) {
             throw new FileCreateException(directory.toString(), e);
         }

@@ -1,5 +1,8 @@
 package com.chernov;
 
+import com.chernov.impl.FileAttachment;
+import com.chernov.internal.domain.FileExtension;
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -11,8 +14,8 @@ public class MainApp {
 
     public static void main(String[] args) throws IOException {
         // Choose impl, e.g. minio or directory
-        var fileStorageApi = MinioStorageConfig.fileStorageApi();
-//        var fileStorageApi = DirectoryStorageConfig.fileStorageApi();
+//        var fileStorageApi = MinioStorageConfig.fileStorageApi();
+        var fileStorageApi = DirectoryStorageConfig.fileStorageApi();
 
         // store file attachment
         var fileId = "1";
@@ -32,7 +35,7 @@ public class MainApp {
         var attachment = fileStorageApi.findBy(id);
 
         // download content
-        try (var bw = new FileOutputStream("custom-dir\\test_response.txt");
+        try (var bw = new FileOutputStream("user-dir\\test_response.txt");
              var content = attachment.getContent()) {
             bw.write(content.readAllBytes());
             bw.flush();

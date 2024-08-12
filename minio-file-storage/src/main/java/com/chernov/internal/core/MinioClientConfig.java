@@ -23,6 +23,6 @@ public class MinioClientConfig {
 
     public String getBucket() {
         return ofNullable(minioFileStorageProperties.getBucket())
-                .orElse("default-bucket");
+                .orElseThrow(() -> new IllegalArgumentException("Need to define bucket in your configuration"));
     }
 }

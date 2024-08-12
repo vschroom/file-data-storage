@@ -1,10 +1,12 @@
-package com.chernov;
+package com.chernov.internal.core;
 
+import com.chernov.Attachment;
+import com.chernov.FileStorageApi;
 import com.chernov.internal.api.InternalFileStorageApi;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-class FileStorageApiImpl implements FileStorageApi {
+public class FileStorageApiImpl implements FileStorageApi {
 
     private final InternalFileStorageApi internalFileStorageApi;
 

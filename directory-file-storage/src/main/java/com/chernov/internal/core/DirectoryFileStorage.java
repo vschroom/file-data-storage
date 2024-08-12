@@ -1,12 +1,15 @@
 package com.chernov.internal.core;
 
-import com.chernov.*;
+import com.chernov.Attachment;
+import com.chernov.impl.FileAttachment;
+import com.chernov.FileStorageIdGenerator;
 import com.chernov.internal.api.InternalFileStorageApi;
-import com.chernov.internal.api.UuidComponent;
-import com.chernov.internal.exceptions.*;
+import com.chernov.internal.exceptions.FileReadException;
+import com.chernov.internal.exceptions.FileUploadException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -20,12 +23,11 @@ public class DirectoryFileStorage implements InternalFileStorageApi {
     private static final String INITIAL_EXTENSION = "initial_extension";
 
     private final FileSystemService fileSystemService;
-    private final GeneratorTypeId generatorTypeId;
-    private final GeneratorIdService generatorIdService;
+    private final FileStorageIdGenerator fileStorageIdGenerator;
 
     @Override
     public String store(@NonNull Attachment attachment) {
-        var attachmentId = defineAttachmentId(attachment);
+        var attachmentId = fileStorageIdGenerator.generateId(attachment);
 
         try {
             fileSystemService.uploadFile(attachmentId, attachment.getContent());
@@ -33,12 +35,10 @@ public class DirectoryFileStorage implements InternalFileStorageApi {
             var metadata = customizeMetadataKey(attachment.getMetadata());
             addDefaultMetadata(metadata, attachment);
             fileSystemService.addMetadata(attachmentId, metadata);
-        } catch (IoFileUploadException ex) {
-            throw new FileUploadException(attachmentId, ex);
-        } catch (IoFileUploadMetadataException ex) {
+        } catch (IOException ex) {
             this.remove(attachmentId);
 
-            throw new FileUploadMetadataException(attachmentId, ex);
+            throw new FileUploadException(attachmentId, ex);
         }
 
         return attachmentId;
@@ -63,10 +63,8 @@ public class DirectoryFileStorage implements InternalFileStorageApi {
             var extension = metadata.get(INITIAL_EXTENSION);
 
             return new FileAttachment(id, fileContent, metadata, filename, extension);
-        } catch (IoFileReadException ex) {
+        } catch (IOException ex) {
             throw new FileReadException(id, ex);
-        } catch (IoFileMetadataReadException ex) {
-            throw new FileMetadataReadException(id, ex);
         }
     }
 
@@ -78,16 +76,5 @@ public class DirectoryFileStorage implements InternalFileStorageApi {
     private void addDefaultMetadata(Map<String, String> metadata, Attachment attachment) {
         metadata.put(format("%s:%s", USER_METADATA_KEY, INITIAL_FILENAME), attachment.getFilename());
         metadata.put(format("%s:%s", USER_METADATA_KEY, INITIAL_EXTENSION), attachment.getFileExtension());
-    }
-
-    private String defineAttachmentId(Attachment attachment) {
-        switch (this.generatorTypeId) {
-            case CUSTOM_GENERATOR:
-                return generatorIdService.generateId();
-            case LIB_GENERATOR:
-                return new DefaultGeneratorIdService(new UuidComponent()).generateId();
-            default:
-                return attachment.getId();
-        }
     }
 }

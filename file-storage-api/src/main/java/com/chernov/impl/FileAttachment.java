@@ -1,5 +1,6 @@
-package com.chernov;
+package com.chernov.impl;
 
+import com.chernov.Attachment;
 import lombok.RequiredArgsConstructor;
 
 import java.io.InputStream;

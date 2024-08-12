@@ -5,6 +5,7 @@ import com.chernov.internal.exceptions.MinioFileStorageException;
 import io.minio.*;
 import io.minio.errors.ErrorResponseException;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.InputStream;
@@ -13,17 +14,13 @@ import java.util.Map;
 import static java.lang.String.format;
 
 @Slf4j
+@RequiredArgsConstructor
 public class MinioFileStorageServiceImpl implements MinioFileStorageService {
 
     private static final String NO_SUCH_KEY_ERROR_CODE = "NoSuchKey";
 
     private final MinioClient minioClient;
     private final String bucket;
-
-    public MinioFileStorageServiceImpl(MinioClient minioClient, String bucket) {
-        this.minioClient = minioClient;
-        this.bucket = makeBucketIfNotExists(bucket);
-    }
 
     @Override
     public void putObject(@NonNull String id, @NonNull Attachment attachment) {
@@ -106,7 +103,7 @@ public class MinioFileStorageServiceImpl implements MinioFileStorageService {
         }
     }
 
-    private String makeBucketIfNotExists(@NonNull String bucket) {
+    public void makeBucketIfNotExists() {
         var exists = this.hasBucket(bucket);
         if (!exists) {
             try {
@@ -118,8 +115,6 @@ public class MinioFileStorageServiceImpl implements MinioFileStorageService {
                         format("Some problem while make bucket=%s", bucket), ex);
             }
         }
-
-        return bucket;
     }
 
     private boolean hasBucket(String bucket) {

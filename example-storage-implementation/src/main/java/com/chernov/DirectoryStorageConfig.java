@@ -1,6 +1,7 @@
 package com.chernov;
 
 import com.chernov.internal.core.StorageType;
+import com.chernov.internal.domain.GeneratorTypeId;
 
 import java.nio.file.Path;
 
@@ -10,9 +11,8 @@ public class DirectoryStorageConfig {
         return FileStorageApiFactory.create(
                 DirectoryFileStorageFactory.create(
                         new DirectoryFileStorageProperties(
-                                Path.of("custom-dir"),
+                                Path.of("user-dir"),
                                 StorageType.ZIP,
-                                GeneratorTypeId.CUSTOM_GENERATOR,
-                                new CustomGeneratorId())));
+                                GeneratorTypeId.CUSTOM_GENERATOR), new CustomFileStorageId()));
     }
 }

@@ -1,4 +1,4 @@
-package com.chernov;
+package com.chernov.internal.exceptions;
 
 public class FileStorageException extends RuntimeException {
 

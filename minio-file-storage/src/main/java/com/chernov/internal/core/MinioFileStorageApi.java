@@ -1,8 +1,9 @@
 package com.chernov.internal.core;
 
-import com.chernov.*;
+import com.chernov.Attachment;
+import com.chernov.impl.FileAttachment;
+import com.chernov.FileStorageIdGenerator;
 import com.chernov.internal.api.InternalFileStorageApi;
-import com.chernov.internal.api.UuidComponent;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
@@ -14,12 +15,11 @@ public class MinioFileStorageApi implements InternalFileStorageApi {
     private static final String INITIAL_FILENAME = "initial_filename";
     private static final String INITIAL_EXTENSION = "initial_extension";
     private final MinioFileStorageService minioFileStorageService;
-    private final GeneratorTypeId generatorTypeId;
-    private final GeneratorIdService generatorIdService;
+    private final FileStorageIdGenerator fileStorageIdGenerator;
 
     @Override
     public String store(@NonNull Attachment attachment) {
-        var id = defineAttachmentId(attachment);
+        var id = fileStorageIdGenerator.generateId(attachment);
         addDefaultMetadata(attachment.getMetadata(), attachment);
         minioFileStorageService.putObject(id, attachment);
 
@@ -51,16 +51,5 @@ public class MinioFileStorageApi implements InternalFileStorageApi {
     private void addDefaultMetadata(Map<String, String> metadata, Attachment attachment) {
         metadata.put(INITIAL_FILENAME, attachment.getFilename());
         metadata.put(INITIAL_EXTENSION, attachment.getFileExtension());
-    }
-
-    private String defineAttachmentId(Attachment attachment) {
-        switch (this.generatorTypeId) {
-            case CUSTOM_GENERATOR:
-                return generatorIdService.generateId();
-            case LIB_GENERATOR:
-                return new DefaultGeneratorIdService(new UuidComponent()).generateId();
-            default:
-                return attachment.getId();
-        }
     }
 }

@@ -1,4 +1,4 @@
-package com.chernov;
+package com.chernov.internal.domain;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

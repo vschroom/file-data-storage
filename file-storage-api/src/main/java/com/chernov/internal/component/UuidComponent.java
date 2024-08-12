@@ -1,4 +1,4 @@
-package com.chernov.internal.api;
+package com.chernov.internal.component;
 
 import java.util.UUID;
 

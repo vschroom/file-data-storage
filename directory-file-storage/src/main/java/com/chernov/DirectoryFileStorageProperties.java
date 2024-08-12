@@ -1,6 +1,7 @@
 package com.chernov;
 
 import com.chernov.internal.core.StorageType;
+import com.chernov.internal.domain.GeneratorTypeId;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,10 +18,9 @@ public class DirectoryFileStorageProperties {
     private Path directory;
     private StorageType storageType;
     private GeneratorTypeId generatorTypeId;
-    private GeneratorIdService generatorIdService;
 
     public Path getDirectory() {
         return ofNullable(this.directory)
-                .orElseGet(() -> Path.of("default-dir"));
+                .orElseThrow(() -> new IllegalArgumentException("Directory value cannot be empty or null"));
     }
 }
